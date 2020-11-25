@@ -1,48 +1,286 @@
-import React, {useState} from "react";
+import React from "react";
 import './index.scss'
-import axios from 'axios'
-import {hostOrigin} from "../../index";
+import Menu from "./menu";
+import Board from "./board";
+import SingleButton from "../../component/single-button";
+import {http, timeout} from "../../utils";
+import {language} from "../../lang";
 
-const Game = ()=>{
-    const [available, setAvailable] = useState('not')
+const playEvent = new CustomEvent('play-event');
+let cachePos = ''
 
-    // check has some people playing
-    axios.post(hostOrigin + '/api/gobang/check-available').then(res=>{
-        const data = res.data;
-        if (data.status){
-            setAvailable(data.data);
-            if (data.data === 'create'){
-                axios.post(hostOrigin + '/api/gobang/create', {
-                    data: {
-                        name: 'player-1'
-                    }
-                }).then(res=>{
+class Game extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            available: '',
+            err: '',
+            lang: 'zh',
 
+            self: '',
+            enemy: 'unknown',
+            myNumber: 0,
+            turnAt: 0,
+            timer: timeout,
+
+            history: [],
+            endState: false
+        }
+    }
+
+    componentDidMount() {
+        (async ()=>{
+            await this.reload()
+        })()
+    }
+
+    throwError(err){
+        this.state.err = err
+    }
+
+    async reload (){
+        this.setState({
+            available: '',
+            enemy: '',
+            myNumber: 0,
+            turnAt: 0,
+            timer: 0,
+            history: [],
+            endState: false
+        })
+        await this.getAvailable()
+    }
+
+    async getAvailable (){
+        const data = await http('check-available', {}, this.throwError);
+        if (data[0]){
+            this.setState({
+                available: data[1]
+            })
+        }else{
+            // TODO resume game
+            this.setState({
+                available: 'resume'
+            })
+        }
+    }
+
+    async createGame (){
+        const data = await http('create', {nick: this.state.self}, this.throwError);
+        if (data[0]){
+            this.setState({
+                available: 'waiting'
+            })
+            const data = await http('wait', {}, this.throwError)
+            if (data[0]) {
+                this.setState({
+                    enemy: data[1],
+                    myNumber: 0,
+                    available: 'running'
                 })
-            }else if (data.data === 'join'){
-                axios.post(hostOrigin + '/api/gobang/join', {
-                    data: {
-                        name: 'player-2'
-                    }
-                }).then(res=>{
-
-                })
+                await this.gameLoop()
             }
         }
-    })
+    }
 
-    return (
-        <div className={'scope--game'}>
-            {available!=='not'? (
-                <div>
+    async cancelWait (){
+        const data = await http('end', {}, this.throwError);
+        if (data[0]) {
+            await this.reload();
+        }
+    }
+
+    async joinGame (){
+        const data = await http('join', {nick: this.state.self}, this.throwError)
+        if (data[0]) {
+            this.setState({
+                enemy: data[1],
+                myNumber: 1,
+                available: 'running'
+            })
+            await this.gameLoop()
+        }
+    }
+    async gameLoop (){
+        if (this.state.turnAt !== this.state.myNumber){
+            // 先等待
+            if (!await this.gameWait()) return
+            this.setState({
+                turnAt: this.state.turnAt?0:1
+            })
+        }
+        while (await this.gamePlay()){
+            this.setState({
+                turnAt: this.state.turnAt?0:1
+            })
+            const res = await this.gameWait()
+            this.setState({
+                turnAt: this.state.turnAt?0:1
+            })
+            if (!res) return
+        }
+    }
+    async gamePlay (){
+        console.log('wait play')
+        return new Promise((resolve => {
+            this.setState({
+                timer: timeout
+            })
+            const handle = setInterval(()=>{
+                this.setState({
+                    timer: this.state.timer-1
+                })
+                if (this.state.timer === 0){
+                    window.removeEventListener('play-event', playEventHandle)
+                    clearInterval(handle);
+                    this.setState({
+                        err: '超时，你输了'
+                    })
+                }
+            }, 1000);
+            const playEventHandle = async ()=> {
+                window.removeEventListener('play-event', playEventHandle);
+                clearInterval(handle);
+                resolve((await http('play', {pos: JSON.stringify(cachePos)}, this.throwError))[0])
+                console.log('wait end')
+            }
+            window.addEventListener('play-event', playEventHandle);
+        }))
+    }
+    setCheese (e){
+        if (this.state.turnAt === this.state.myNumber) {
+            cachePos = [e.screenX, e.screenY]
+            const temp = this.state.history.slice()
+            temp.push(cachePos)
+            this.setState({
+                history: temp
+            })
+            window.dispatchEvent(playEvent);
+        }else{
+            this.setState({
+                err: '请先等待对方下棋'
+            })
+        }
+    }
+    async gameWait (){
+        console.log('wait enemy play')
+        this.setState({
+            timer: timeout
+        })
+        const handle = setInterval(()=>{
+            this.setState({
+                timer: this.state.timer-1
+            })
+            if (this.state.timer === 0){
+                clearInterval(handle)
+            }
+        }, 1000);
+        const data = await http('wait', {}, this.throwError, {timeout: 60000});
+        clearInterval(handle);
+        if (data[0]){
+           if (data[1] === 'end'){
+               this.setState({
+                   err: '对方弃战了'
+               })
+               return false
+           }else{
+               cachePos = JSON.parse(data[1])
+               const temp = this.state.history.slice()
+               temp.push(cachePos)
+               this.setState({
+                   history: temp
+               })
+           }
+        }
+        return data[0]
+    }
+
+    watchGame (){
+
+    }
+
+    render() {
+        let content = '';
+        switch (this.state.available) {
+            case "":
+                content = (
+                    <div className={this.state.available}>
+                        初始化...
+                    </div>)
+                break
+            case "not":
+                content = (
+                    <div className={this.state.available}>
+                        出错了,尝试刷新页面?
+                    </div>)
+                break
+            case "exist":
+                content = (
+                    <div className={this.state.available}>
+                        有人在玩了,你可以选择观战
+                        <SingleButton text={language.watchGame[this.state.lang]} onClick={() => this.watchGame()}/>
+                    </div>)
+                break
+            case "create":
+                content = (
+                    <div className={this.state.available}>
+                        <label>
+                            <input placeholder={language.nickName[this.state.lang]} value={this.state.self}
+                                   onChange={(v) => {
+                                       this.setState({
+                                           self: v.target.value
+                                       })
+                                   }}/>
+                        </label>
+                        <SingleButton text={language.createGame[this.state.lang]} onClick={() => this.createGame()}/>
+                    </div>)
+                break
+            case "waiting":
+                content = (
+                    <div className={this.state.available}>
+                        等待玩家加入...
+                        <SingleButton text={language.cancel[this.state.lang]} onClick={() => this.cancelWait()}/>
+                    </div>)
+                break
+            case "join":
+                content = (
+                    <div className={this.state.available}>
+                        <label>
+                            <input placeholder={language.nickName[this.state.lang]} value={this.state.self}
+                                   onChange={(v) => {
+                                       this.setState({
+                                           self: v.target.value
+                                       })
+                                   }}/>
+                        </label>
+                        <SingleButton text={language.joinGame[this.state.lang]} onClick={() => this.joinGame()}/>
+                    </div>)
+                break
+            case "running":
+                content = (
+                    <div className={this.state.available}>
+                        <Menu self={this.state.self} enemy={this.state.enemy}
+                              isMe={this.state.myNumber === this.state.turnAt} timer={this.state.timer}
+                              ended={this.state.endState} reload={this.reload}/>
+                        <Board history={this.state.history} ended={this.state.endState} play={(e)=>{this.setCheese(e)}}/>
+                    </div>)
+                break
+            case "resume":
+                content = (
+                    <div className={this.state.available}>
+                        正在恢复对局...
+                    </div>)
+                break
+        }
+        return (
+            <div className={'scope--game'}>
+                <div id='status'>
+                    <b>{this.state.err}</b>
                 </div>
-            ): (
-                <div>
-                    有人在玩了
-                </div>
-            )}
-        </div>
-    )
+                {content}
+            </div>
+        )
+    }
 }
 
 export default Game
