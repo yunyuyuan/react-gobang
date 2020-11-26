@@ -7,15 +7,16 @@ import {http, timeout} from "../../utils";
 import {language} from "../../lang";
 
 const playEvent = new CustomEvent('play-event');
-let cachePos = ''
 
 class Game extends React.Component{
     constructor(props) {
         super(props);
+        this.activePos = [];
         this.state = {
             available: '',
             err: '',
             lang: 'zh',
+            assistant: true,
 
             self: '',
             enemy: 'unknown',
@@ -35,7 +36,9 @@ class Game extends React.Component{
     }
 
     throwError(err){
-        this.state.err = err
+        this.setState({
+            err: err
+        })
     }
 
     async reload (){
@@ -52,7 +55,7 @@ class Game extends React.Component{
     }
 
     async getAvailable (){
-        const data = await http('check-available', {}, this.throwError);
+        const data = await http('check-available', {}, (err)=>this.throwError(err));
         if (data[0]){
             this.setState({
                 available: data[1]
@@ -66,12 +69,12 @@ class Game extends React.Component{
     }
 
     async createGame (){
-        const data = await http('create', {nick: this.state.self}, this.throwError);
+        const data = await http('create', {nick: this.state.self}, (err)=>this.throwError(err));
         if (data[0]){
             this.setState({
                 available: 'waiting'
             })
-            const data = await http('wait', {}, this.throwError)
+            const data = await http('wait', {}, (err)=>this.throwError(err))
             if (data[0]) {
                 this.setState({
                     enemy: data[1],
@@ -84,14 +87,14 @@ class Game extends React.Component{
     }
 
     async cancelWait (){
-        const data = await http('end', {}, this.throwError);
+        const data = await http('end', {}, (err)=>this.throwError(err));
         if (data[0]) {
             await this.reload();
         }
     }
 
     async joinGame (){
-        const data = await http('join', {nick: this.state.self}, this.throwError)
+        const data = await http('join', {nick: this.state.self}, (err)=>this.throwError(err))
         if (data[0]) {
             this.setState({
                 enemy: data[1],
@@ -141,17 +144,17 @@ class Game extends React.Component{
             const playEventHandle = async ()=> {
                 window.removeEventListener('play-event', playEventHandle);
                 clearInterval(handle);
-                resolve((await http('play', {pos: JSON.stringify(cachePos)}, this.throwError))[0])
+                resolve((await http('play', {pos: JSON.stringify(this.activePos)}, (err)=>this.throwError(err)))[0])
                 console.log('wait end')
             }
             window.addEventListener('play-event', playEventHandle);
         }))
     }
-    setCheese (e){
+    setCheese (pos){
         if (this.state.turnAt === this.state.myNumber) {
-            cachePos = [e.screenX, e.screenY]
+            this.activePos = pos
             const temp = this.state.history.slice()
-            temp.push(cachePos)
+            temp.push(pos)
             this.setState({
                 history: temp
             })
@@ -175,7 +178,7 @@ class Game extends React.Component{
                 clearInterval(handle)
             }
         }, 1000);
-        const data = await http('wait', {}, this.throwError, {timeout: 60000});
+        const data = await http('wait', {}, (err)=>this.throwError(err), {timeout: (timeout*2)*1000});
         clearInterval(handle);
         if (data[0]){
            if (data[1] === 'end'){
@@ -184,9 +187,15 @@ class Game extends React.Component{
                })
                return false
            }else{
-               cachePos = JSON.parse(data[1])
+               const pos = JSON.parse(data[1])
+               for (const v of this.state.history){
+                   if (v[0] === pos[0] && v[1] === pos[1]) {
+                       this.throwError('对方非法操作!')
+                       return
+                   }
+               }
                const temp = this.state.history.slice()
-               temp.push(cachePos)
+               temp.push(pos)
                this.setState({
                    history: temp
                })
@@ -262,7 +271,8 @@ class Game extends React.Component{
                         <Menu self={this.state.self} enemy={this.state.enemy}
                               isMe={this.state.myNumber === this.state.turnAt} timer={this.state.timer}
                               ended={this.state.endState} reload={this.reload}/>
-                        <Board history={this.state.history} ended={this.state.endState} play={(e)=>{this.setCheese(e)}}/>
+                        <Board history={this.state.history} ended={this.state.endState} myNumber={this.state.myNumber}
+                               play={(e)=>{this.setCheese(e)}} assistant={this.state.assistant}/>
                     </div>)
                 break
             case "resume":

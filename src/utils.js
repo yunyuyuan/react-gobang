@@ -1,7 +1,10 @@
 import axios from "axios";
 import {hostOrigin} from "./index";
 
-export const timeout = 17000;
+export const timeout = 17;
+
+export const boardLines = 15;
+export const winNum = 5;
 
 export async function http(endpoint, param, throwError, config){
     try{
