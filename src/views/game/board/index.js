@@ -100,15 +100,16 @@ class Board extends React.Component {
             for (const orient of [[1, 0], [0, 1], [-1, 1], [1, 1], [1, -1], [-1, -1], [-1, 0], [0, -1]]) {
                 // 8种
                 const findList = [start];
-                for (const pos of lis) {
-                    const intervalX = pos[0] - start[0];
-                    const intervalY = pos[1] - start[1];
-                    if (intervalX < winNum && intervalY < winNum  && intervalX*orient[0] === intervalY*orient[1]) {
-                        findList.push(pos)
-                        if (findList.length === winNum){
-                            return findList
-                        }
+                for (let idx=1;idx<winNum;idx++){
+                    const findPos = lis.find(v=>{
+                        return v[0]===start[0]+orient[0]*idx && v[1]===start[1]+orient[1]*idx
+                    })
+                    if (findPos){
+                        findList.push(findPos)
                     }
+                }
+                if (findList.length === winNum){
+                    return findList
                 }
             }
         }
