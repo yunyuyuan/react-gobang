@@ -3,10 +3,9 @@ import './index.scss'
 import Menu from "./menu";
 import Board from "./board";
 import SingleButton from "../../component/single-button";
-import {http, timeout} from "../../utils";
+import {boardLines, checkPlayerWin, http, timeout} from "../../utils";
 import {language} from "../../lang";
 
-const playEvent = new CustomEvent('play-event');
 
 class Game extends React.Component{
     constructor(props) {
@@ -25,7 +24,9 @@ class Game extends React.Component{
             timer: timeout,
 
             history: [],
-            endState: false
+            endState: false,
+            winner: -1,
+            winList: []
         }
     }
 
@@ -44,12 +45,15 @@ class Game extends React.Component{
     async reload (){
         this.setState({
             available: '',
-            enemy: '',
+            enemy: 'unknown',
             myNumber: 0,
             turnAt: 0,
             timer: 0,
+
             history: [],
-            endState: false
+            endState: false,
+            winner: -1,
+            winList: []
         })
         await this.getAvailable()
     }
@@ -83,6 +87,8 @@ class Game extends React.Component{
                 })
                 await this.gameLoop()
             }
+        }else{
+            await this.reload()
         }
     }
 
@@ -102,6 +108,8 @@ class Game extends React.Component{
                 available: 'running'
             })
             await this.gameLoop()
+        }else{
+            await this.reload()
         }
     }
     async gameLoop (){
@@ -137,20 +145,27 @@ class Game extends React.Component{
                     window.removeEventListener('play-event', playEventHandle)
                     clearInterval(handle);
                     this.setState({
-                        err: '超时，你输了'
+                        err: '超时，你输了',
+                        endState: true
                     })
                 }
             }, 1000);
-            const playEventHandle = async ()=> {
+            const playEventHandle = async (e)=> {
                 window.removeEventListener('play-event', playEventHandle);
                 clearInterval(handle);
-                resolve((await http('play', {pos: JSON.stringify(this.activePos)}, (err)=>this.throwError(err)))[0])
-                console.log('wait end')
+                if (this.checkWin(this.state.myNumber, e.detail) || this.checkDraw(e.detail)){
+                    await http('play', {pos: JSON.stringify(this.activePos), end: true}, (err) => this.throwError(err))
+                    // 发送后直接结束
+                    resolve(false)
+                }else {
+                    resolve((await http('play', {pos: JSON.stringify(this.activePos)}, (err) => this.throwError(err)))[0])
+                }
             }
             window.addEventListener('play-event', playEventHandle);
         }))
     }
     setCheese (pos){
+        if (this.state.winner !== -1 || pos.length===0) return false
         if (this.state.turnAt === this.state.myNumber) {
             this.activePos = pos
             const temp = this.state.history.slice()
@@ -158,6 +173,8 @@ class Game extends React.Component{
             this.setState({
                 history: temp
             })
+            // 防止setState异步更新
+            const playEvent = new CustomEvent('play-event', {detail: temp});
             window.dispatchEvent(playEvent);
         }else{
             this.setState({
@@ -166,6 +183,7 @@ class Game extends React.Component{
         }
     }
     async gameWait (){
+        if (this.state.winner !== -1) return false
         console.log('wait enemy play')
         this.setState({
             timer: timeout
@@ -178,20 +196,24 @@ class Game extends React.Component{
                 clearInterval(handle)
             }
         }, 1000);
-        const data = await http('wait', {}, (err)=>this.throwError(err), {timeout: (timeout*2)*1000});
+        const data = await http('wait', {}, (err)=>this.throwError(err), {timeout: (timeout)*1000+1000});
         clearInterval(handle);
         if (data[0]){
            if (data[1] === 'end'){
                this.setState({
-                   err: '对方弃战了'
+                   err: '对方弃战了',
+                   endState: true
                })
                return false
            }else{
-               const pos = JSON.parse(data[1])
+               const pos = JSON.parse(data[1]);
                for (const v of this.state.history){
                    if (v[0] === pos[0] && v[1] === pos[1]) {
                        this.throwError('对方非法操作!')
-                       return
+                       this.setState({
+                           endState: true
+                       })
+                       return false
                    }
                }
                const temp = this.state.history.slice()
@@ -199,6 +221,10 @@ class Game extends React.Component{
                this.setState({
                    history: temp
                })
+               if (this.checkWin(this.state.myNumber?0:1, temp) || this.checkDraw(temp)){
+                   // 游戏结束
+                   return false
+               }
            }
         }
         return data[0]
@@ -268,11 +294,12 @@ class Game extends React.Component{
             case "running":
                 content = (
                     <div className={this.state.available}>
-                        <Menu self={this.state.self} enemy={this.state.enemy}
-                              isMe={this.state.myNumber === this.state.turnAt} timer={this.state.timer}
+                        <Menu self={this.state.self} enemy={this.state.enemy} isMe={this.state.myNumber === this.state.turnAt}
+                              timer={this.state.timer}
                               ended={this.state.endState} reload={this.reload}/>
                         <Board history={this.state.history} ended={this.state.endState} myNumber={this.state.myNumber}
-                               play={(e)=>{this.setCheese(e)}} assistant={this.state.assistant}/>
+                               play={(e)=>{this.setCheese(e)}} assistant={this.state.assistant} turnOn={this.state.myNumber===this.state.turnAt}
+                               winner={this.state.winner} winList={this.state.winList}/>
                     </div>)
                 break
             case "resume":
@@ -288,8 +315,28 @@ class Game extends React.Component{
                     <b>{this.state.err}</b>
                 </div>
                 {content}
-            </div>
-        )
+            </div>)
+    }
+
+    checkWin (num, lis){
+        let winList = checkPlayerWin(num, lis),
+            winner = winList.length?num:-1;
+        this.setState({
+            winner,
+            winList,
+            endState: winner !== -1
+        })
+        return winList.length
+    }
+
+    checkDraw (lis){
+        if (lis.length === boardLines*boardLines){
+            this.setState({
+                endState: true
+            })
+            return true
+        }
+        return false
     }
 }
 

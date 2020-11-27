@@ -62,6 +62,9 @@
         background: black;
       }
       &.fake-win{
+        border-color: #2dfd68;
+      }
+      &.win{
         background: #2dfd68 !important;
       }
     }

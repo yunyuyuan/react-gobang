@@ -24,3 +24,36 @@ export async function http(endpoint, param, throwError, config){
         return [false]
     }
 }
+
+export function checkPlayerWin(num, lis){
+    // 取出自己的棋子
+    const my = [];
+    lis.forEach((v, idx)=>{
+        if (idx%2 === num){
+            my.push(v)
+        }
+    })
+    return checkWin(my)
+}
+
+export function checkWin(lis) {
+    for (const start of lis) {
+        // 以start为开始
+        for (const orient of [[1, 0], [0, 1], [-1, 1], [1, 1], [1, -1], [-1, -1], [-1, 0], [0, -1]]) {
+            // 8种
+            const findList = [start];
+            for (let idx=1;idx<winNum;idx++){
+                const findPos = lis.find(v=>{
+                    return v[0]===start[0]+orient[0]*idx && v[1]===start[1]+orient[1]*idx
+                })
+                if (findPos){
+                    findList.push(findPos)
+                }
+            }
+            if (findList.length === winNum){
+                return findList
+            }
+        }
+    }
+    return []
+}

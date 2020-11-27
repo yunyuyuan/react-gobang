@@ -1,6 +1,6 @@
 import React from "react";
 import './index.scss'
-import {boardLines, winNum} from "../../../utils";
+import {boardLines, checkPlayerWin, winNum} from "../../../utils";
 
 class Board extends React.Component {
     constructor(props) {
@@ -27,6 +27,13 @@ class Board extends React.Component {
     }
 
     mouseMove = (e) => {
+        // 游戏结束||没轮到你
+        if (this.props.winner !== -1 || !this.props.turnOn) {
+            this.setState({
+                activePos: []
+            })
+            return
+        }
         const container = this.linesContainer.current;
         const rect = container.getBoundingClientRect(),
             ceilSize = rect.width / (boardLines - 1);
@@ -40,13 +47,7 @@ class Board extends React.Component {
         if (this.props.assistant) {
             const temp = this.props.history.slice()
             temp.push([offsetX, offsetY])
-            const my = []
-            temp.forEach((v, idx)=>{
-                if (idx%2 === this.props.myNumber){
-                    my.push(v)
-                }
-            })
-            fakeWin = this.checkWin(my)
+            fakeWin = checkPlayerWin(this.props.myNumber, temp)
         }
         this.setState({
             activePos: [offsetX, offsetY],
@@ -68,15 +69,19 @@ class Board extends React.Component {
                     {this.lines}
                 </div>
                 <div className='chess-container'>
-                    <span className={'active chess '+
-                    (this.state.fakeWin.find(v=>v[0]===activePos[0]&&v[1]===activePos[1])?'fake-win':'')}
-                          style={this.genChessStyle({pos:activePos, chessSize, ceilSize})}/>
+                    {activePos.length?
+                        <span className={'active chess ' +
+                        (this.state.fakeWin.find(v => v[0] === activePos[0] && v[1] === activePos[1]) ? 'fake-win' : '')}
+                              style={this.genChessStyle({pos: activePos, chessSize, ceilSize})}/>:''
+                    }
                     {
                         this.props.history.map((pos, i) => {
                             return <span key={i}
                                          className={'chess ' +
                                          (i % 2 ? 'white ' : 'black ')+
-                                         (this.state.fakeWin.find(v=>v[0]===pos[0]&&v[1]===pos[1])?'fake-win':'')}
+                                         (this.state.fakeWin.find(v=>v[0]===pos[0]&&v[1]===pos[1])?'fake-win ':' ')+
+                                         (i % 2===this.props.winner?
+                                             (this.props.winList.find(v=>v[0]===pos[0]&&v[1]===pos[1])?'win':''):'')}
                                          style={this.genChessStyle({pos, chessSize, ceilSize})}/>
                         })
                     }
@@ -92,28 +97,6 @@ class Board extends React.Component {
             left: Math.floor(ceilSize * pos[0] + chessSize / 5 - ceilSize / 2 - 2) + 'px',
             top: Math.floor(ceilSize * pos[1] + chessSize / 5 - ceilSize / 2 - 2) + 'px'
         }
-    }
-
-    checkWin(lis) {
-        for (const start of lis) {
-            // 以start为开始
-            for (const orient of [[1, 0], [0, 1], [-1, 1], [1, 1], [1, -1], [-1, -1], [-1, 0], [0, -1]]) {
-                // 8种
-                const findList = [start];
-                for (let idx=1;idx<winNum;idx++){
-                    const findPos = lis.find(v=>{
-                        return v[0]===start[0]+orient[0]*idx && v[1]===start[1]+orient[1]*idx
-                    })
-                    if (findPos){
-                        findList.push(findPos)
-                    }
-                }
-                if (findList.length === winNum){
-                    return findList
-                }
-            }
-        }
-        return []
     }
 }
 
