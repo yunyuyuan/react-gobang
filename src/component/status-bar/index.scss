@@ -1,0 +1,16 @@
+.scope--status-bar{
+  position: fixed;
+  top: 0;
+  margin: 0 50%;
+  transform: translateX(-50%);
+  >span{
+    margin: 1rem;
+    padding: .6rem 1.8rem;
+    border-radius: .3rem;
+    box-shadow: 0 0 .8rem rgba(0, 0, 0, .4);
+    font-size: .85rem;
+    background: white;
+    display: block;
+    word-break: keep-all;
+  }
+}

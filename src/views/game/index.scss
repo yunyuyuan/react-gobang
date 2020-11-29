@@ -1,3 +1,50 @@
 .scope--game{
-
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  >div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &.create, &.join{
+      >label{
+        >input{
+          width: 12rem;
+          font-size: 1.1rem;
+          padding: .4rem;
+          border-radius: .2rem;
+          border: 1px solid gray;
+          margin: 1rem 0;
+        }
+      }
+      >.scope--single-button{
+        >span{
+          color: white;
+        }
+      }
+    }
+    &.create{
+      >.scope--single-button{
+        background: #006aff;
+      }
+    }
+    &.join{
+      >.scope--single-button{
+        background: #ff820c;
+      }
+    }
+    &.waiting{
+      >span{
+        font-size: 1rem;
+        margin: 1rem 0;
+      }
+      >.scope--single-button{
+        background: #ff3a3a;
+        >span{
+          color: white;
+        }
+      }
+    }
+  }
 }

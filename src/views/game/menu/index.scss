@@ -1,10 +1,44 @@
 .scope--menu{
+  width: 40rem;
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem 0;
   >.player{
+    width: 30%;
+    padding: .6rem .5rem;
+    border: 1px solid #9d9d9d;
+    display: flex;
+    flex-direction: column;
+    >b{
+      font-size: 1.1rem;
+      margin-bottom: .4rem;
+    }
+    >.timer{
+      >span{
+        >b{
+          margin-left: .4rem;
+          display: inline-block;
+          &.red{
+            color: red;
+          }
+        }
+      }
+    }
     &1{
-      background: red;
+      border-color: #ff2121;
     }
     &2{
 
+    }
+  }
+  >.mid{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    >.scope--single-button{
+      background: #ff5252;
+      color: white;
     }
   }
 }

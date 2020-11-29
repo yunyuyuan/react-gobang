@@ -1,12 +1,12 @@
 .scope--single-button{
   cursor: pointer;
   border-radius: .2rem;
-  box-shadow: 0 0 .1rem rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 .12rem rgba(0, 0, 0, 0.4);
   transition: all .15s ease-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid transparent;
   &:hover{
     box-shadow: 0 .1rem .2rem rgba(0, 0, 0, 0.6);
   }

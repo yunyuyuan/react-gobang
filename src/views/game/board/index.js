@@ -27,8 +27,8 @@ class Board extends React.Component {
     }
 
     mouseMove = (e) => {
-        // 游戏结束||没轮到你
-        if (this.props.winner !== -1 || !this.props.turnOn) {
+        // 玩家获胜 | 没轮到你 | 游戏结束
+        if (this.props.winner !== -1 || !this.props.turnOn || this.props.ended) {
             this.setState({
                 activePos: []
             })

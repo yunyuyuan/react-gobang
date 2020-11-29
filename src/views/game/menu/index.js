@@ -8,7 +8,10 @@ const Menu = ({self, enemy, isMe, timer, ended, reload})=>{
     useEffect(()=>{
         setTimerDiv((
             <div className='timer'>
-                <span>{timer}</span>
+                <span>
+                    倒计时
+                    <b className={timer<=5?'red':''}>{timer}</b>
+                </span>
             </div>
         ))
     }, [timer])

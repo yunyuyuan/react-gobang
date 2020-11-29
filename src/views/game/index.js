@@ -5,6 +5,7 @@ import Board from "./board";
 import SingleButton from "../../component/single-button";
 import {boardLines, checkPlayerWin, http, timeout} from "../../utils";
 import {language} from "../../lang";
+import StatusBar from "../../component/status-bar";
 
 
 class Game extends React.Component{
@@ -73,6 +74,10 @@ class Game extends React.Component{
     }
 
     async createGame (){
+        if (!this.state.self) {
+            this.throwError('昵称不能为空!')
+            return
+        }
         const data = await http('create', {nick: this.state.self}, (err)=>this.throwError(err));
         if (data[0]){
             this.setState({
@@ -86,6 +91,8 @@ class Game extends React.Component{
                     available: 'running'
                 })
                 await this.gameLoop()
+            }else{
+                await this.reload()
             }
         }else{
             await this.reload()
@@ -100,6 +107,10 @@ class Game extends React.Component{
     }
 
     async joinGame (){
+        if (!this.state.self) {
+            this.throwError('昵称不能为空!')
+            return
+        }
         const data = await http('join', {nick: this.state.self}, (err)=>this.throwError(err))
         if (data[0]) {
             this.setState({
@@ -165,7 +176,7 @@ class Game extends React.Component{
         }))
     }
     setCheese (pos){
-        if (this.state.winner !== -1 || pos.length===0) return false
+        if (this.state.winner !== -1 || pos.length===0 || this.state.endState) return false
         if (this.state.turnAt === this.state.myNumber) {
             this.activePos = pos
             const temp = this.state.history.slice()
@@ -273,7 +284,7 @@ class Game extends React.Component{
             case "waiting":
                 content = (
                     <div className={this.state.available}>
-                        等待玩家加入...
+                        <span>等待玩家加入...</span>
                         <SingleButton text={language.cancel[this.state.lang]} onClick={() => this.cancelWait()}/>
                     </div>)
                 break
@@ -311,9 +322,7 @@ class Game extends React.Component{
         }
         return (
             <div className={'scope--game'}>
-                <div id='status'>
-                    <b>{this.state.err}</b>
-                </div>
+                <StatusBar class_={''} text={this.state.err}/>
                 {content}
             </div>)
     }
