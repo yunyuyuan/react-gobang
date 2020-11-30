@@ -11,7 +11,7 @@ module.exports = {
     output: {
         path: resolve( 'dist'),
         filename: "[name].[chunkhash].js",
-        publicPath: 'https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build'
+        publicPath: 'https://cdn.jsdelivr.net/gh/yunyuyuan/react-gobang@latest/build'
     },
     module: {
         rules: [

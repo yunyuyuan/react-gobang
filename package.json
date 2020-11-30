@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "NODE_ENV=development react-scripts start",
-    "build": "PUBLIC_URL=https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build NODE_ENV=production react-scripts build && cp build/index.html ./",
+    "build": "PUBLIC_URL=https://cdn.jsdelivr.net/gh/yunyuyuan/react-gobang@latest/build NODE_ENV=production react-scripts build && cp build/index.html ./",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
