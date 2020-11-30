@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/css/main.6b36d2b8.chunk.css",
-    "main.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/main.90a13195.chunk.js",
-    "main.js.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/main.90a13195.chunk.js.map",
-    "runtime-main.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/runtime-main.4a63e9a9.js",
-    "runtime-main.js.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/runtime-main.4a63e9a9.js.map",
-    "static/js/2.1e5e82e1.chunk.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/2.1e5e82e1.chunk.js",
-    "static/js/2.1e5e82e1.chunk.js.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/2.1e5e82e1.chunk.js.map",
-    "index.html": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/index.html",
-    "precache-manifest.33460cc674e84595fe05fba7716f7fc5.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/precache-manifest.33460cc674e84595fe05fba7716f7fc5.js",
-    "service-worker.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/service-worker.js",
-    "static/css/main.6b36d2b8.chunk.css.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/css/main.6b36d2b8.chunk.css.map",
-    "static/js/2.1e5e82e1.chunk.js.LICENSE.txt": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/js/static/js/2.1e5e82e1.chunk.js.LICENSE.txt"
+    "main.css": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/css/main.6b36d2b8.chunk.css",
+    "main.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/main.90a13195.chunk.js",
+    "main.js.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/main.90a13195.chunk.js.map",
+    "runtime-main.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/runtime-main.7a74f7cc.js",
+    "runtime-main.js.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/runtime-main.7a74f7cc.js.map",
+    "static/js/2.1e5e82e1.chunk.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/2.1e5e82e1.chunk.js",
+    "static/js/2.1e5e82e1.chunk.js.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/2.1e5e82e1.chunk.js.map",
+    "index.html": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/index.html",
+    "precache-manifest.298eb28c61b813b8abd0cfa644742b57.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/precache-manifest.298eb28c61b813b8abd0cfa644742b57.js",
+    "service-worker.js": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/service-worker.js",
+    "static/css/main.6b36d2b8.chunk.css.map": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/css/main.6b36d2b8.chunk.css.map",
+    "static/js/2.1e5e82e1.chunk.js.LICENSE.txt": "https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build/static/js/2.1e5e82e1.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.4a63e9a9.js",
+    "static/js/runtime-main.7a74f7cc.js",
     "static/js/2.1e5e82e1.chunk.js",
     "static/css/main.6b36d2b8.chunk.css",
     "static/js/main.90a13195.chunk.js"
