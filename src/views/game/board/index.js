@@ -1,6 +1,6 @@
 import React from "react";
 import './index.scss'
-import {boardLines, checkPlayerWin, winNum} from "../../../utils";
+import {boardLines, checkPlayerFakeWin, checkPlayerWin, winNum} from "../../../utils";
 
 class Board extends React.Component {
     constructor(props) {
@@ -47,7 +47,7 @@ class Board extends React.Component {
         if (this.props.assistant) {
             const temp = this.props.history.slice()
             temp.push([offsetX, offsetY])
-            fakeWin = checkPlayerWin(this.props.myNumber, temp)
+            fakeWin = checkPlayerFakeWin(this.props.myNumber, temp, [offsetX, offsetY])
         }
         this.setState({
             activePos: [offsetX, offsetY],
@@ -73,8 +73,7 @@ class Board extends React.Component {
                         <span className={'active chess ' +
                         (this.state.fakeWin.find(v => v[0] === activePos[0] && v[1] === activePos[1]) ? 'fake-win' : '')}
                               style={this.genChessStyle({pos: activePos, chessSize, ceilSize})}/>:''
-                    }
-                    {
+                    }{
                         this.props.history.map((pos, i) => {
                             return <span key={i}
                                          className={'chess ' +

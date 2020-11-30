@@ -7,7 +7,6 @@ import {boardLines, checkPlayerWin, http, timeout} from "../../utils";
 import {language} from "../../lang";
 import StatusBar from "../../component/status-bar";
 
-
 class Game extends React.Component{
     constructor(props) {
         super(props);
@@ -38,8 +37,8 @@ class Game extends React.Component{
         })()
     }
 
-    throwError(err){
-        this.state.setStatus(err)
+    throwError(err, c){
+        this.state.setStatus(err, c)
     }
 
     async reload (){
@@ -61,9 +60,18 @@ class Game extends React.Component{
     async getAvailable (){
         const data = await http('check-available', {}, (err)=>this.throwError(err));
         if (data[0]){
-            this.setState({
-                available: data[1]
-            })
+            if (typeof data[1] === typeof []){
+                this.setState({
+                    enemy: data[1][1]
+                })
+                this.setState({
+                    available: data[1][0]
+                })
+            }else {
+                this.setState({
+                    available: data[1]
+                })
+            }
         }else{
             // TODO resume game
             this.setState({
@@ -154,8 +162,8 @@ class Game extends React.Component{
                 if (this.state.timer === 0){
                     window.removeEventListener('play-event', playEventHandle)
                     clearInterval(handle);
+                    this.throwError('超时，你输了')
                     this.setState({
-                        err: '超时，你输了',
                         endState: true
                     })
                 }
@@ -187,9 +195,7 @@ class Game extends React.Component{
             const playEvent = new CustomEvent('play-event', {detail: temp});
             window.dispatchEvent(playEvent);
         }else{
-            this.setState({
-                err: '请先等待对方下棋'
-            })
+            this.throwError('请先等待对方下棋')
         }
     }
     async gameWait (){
@@ -210,8 +216,8 @@ class Game extends React.Component{
         clearInterval(handle);
         if (data[0]){
            if (data[1] === 'end'){
+               this.throwError('对方弃战了', 'warn')
                this.setState({
-                   err: '对方弃战了',
                    endState: true
                })
                return false
@@ -219,7 +225,7 @@ class Game extends React.Component{
                const pos = JSON.parse(data[1]);
                for (const v of this.state.history){
                    if (v[0] === pos[0] && v[1] === pos[1]) {
-                       this.throwError('对方非法操作!')
+                       this.throwError('对方非法操作!', 'warn')
                        this.setState({
                            endState: true
                        })
@@ -290,6 +296,7 @@ class Game extends React.Component{
             case "join":
                 content = (
                     <div className={this.state.available}>
+                        <p>加入<b>{this.state.enemy}</b>的对局</p>
                         <label>
                             <input placeholder={language.nickName[this.state.lang]} value={this.state.self}
                                    onChange={(v) => {
@@ -306,7 +313,7 @@ class Game extends React.Component{
                     <div className={this.state.available}>
                         <Menu self={this.state.self} enemy={this.state.enemy} isMe={this.state.myNumber === this.state.turnAt}
                               timer={this.state.timer}
-                              ended={this.state.endState} reload={this.reload}/>
+                              ended={this.state.endState} reload={()=>{this.reload().then()}}/>
                         <Board history={this.state.history} ended={this.state.endState} myNumber={this.state.myNumber}
                                play={(e)=>{this.setCheese(e)}} assistant={this.state.assistant} turnOn={this.state.myNumber===this.state.turnAt}
                                winner={this.state.winner} winList={this.state.winList}/>
@@ -334,11 +341,16 @@ class Game extends React.Component{
             winList,
             endState: winner !== -1
         })
+        const win = winner===this.state.myNumber;
+        if (winner > -1){
+            this.throwError('你'+(win?'赢':'输')+'了', win?'succ':'err')
+        }
         return winList.length
     }
 
     checkDraw (lis){
         if (lis.length === boardLines*boardLines){
+            this.throwError('平局', 'succ')
             this.setState({
                 endState: true
             })

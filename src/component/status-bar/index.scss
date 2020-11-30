@@ -11,9 +11,22 @@
     font-size: .85rem;
     background: white;
     display: block;
-    word-break: keep-all;
+    min-width: 10rem;
     animation: fade-out 4s linear forwards;
     opacity: 0;
+    text-align: center;
+    &.err{
+      background: #ffe4e4;
+      border: 1px solid #ff9595;
+    }
+    &.succ{
+      background: #e6fff4;
+      border: 1px solid #96fcff;
+    }
+    &.warn{
+      background: #fff5e4;
+      border: 1px solid #ffd191;
+    }
   }
   @keyframes fade-out {
     0%{

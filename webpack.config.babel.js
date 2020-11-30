@@ -11,6 +11,7 @@ module.exports = {
     output: {
         path: resolve( 'dist'),
         filename: "[name].[chunkhash].js",
+        publicPath: 'https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build'
     },
     module: {
         rules: [

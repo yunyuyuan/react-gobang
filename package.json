@@ -11,8 +11,8 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "NODE_ENV=development react-scripts start",
+    "build": "PUBLIC_URL=https://cdn.jsdelivr.net/gh/yunyuyuan/heroku-backend@latest/build NODE_ENV=production react-scripts build && cp build/index.html ./",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -36,6 +36,17 @@ export function checkPlayerWin(num, lis){
     return checkWin(my)
 }
 
+export function checkPlayerFakeWin(num, lis, pos){
+    // 取出周围棋子
+    const around = [];
+    lis.forEach((v, idx)=>{
+        if (idx%2 === num && Math.abs(v[0]-pos[0])<winNum && Math.abs(v[1]-pos[1])<winNum){
+            around.push(v)
+        }
+    })
+    return checkWin(around)
+}
+
 export function checkWin(lis) {
     for (const start of lis) {
         // 以start为开始

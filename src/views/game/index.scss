@@ -15,7 +15,7 @@
           padding: .4rem;
           border-radius: .2rem;
           border: 1px solid gray;
-          margin: 1rem 0;
+          margin-bottom: 1rem;
         }
       }
       >.scope--single-button{
@@ -30,6 +30,14 @@
       }
     }
     &.join{
+      >p{
+        font-size: .9rem;
+        >b{
+          margin: 0 .3rem;
+          color: #003aff;
+          font-size: 1.2em;
+        }
+      }
       >.scope--single-button{
         background: #ff820c;
       }

@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import './index.scss'
 
 
-class StatusBar extends React.Component{
+class StatusBar extends React.Component {
     constructor(props) {
         super(props);
         this.id = 0;
@@ -13,12 +13,14 @@ class StatusBar extends React.Component{
         props.set(this.addText)
     }
 
-    addText = (t)=>{
+    addText = (t, c) => {
         const temp = this.state.lis.slice(0, 4)
         temp.splice(0, 0, {
             id: this.id++,
-            text: t
+            text: t,
+            class_: c || 'err'
         })
+        this.id = this.id % 5;
         this.setState({
             lis: temp
         })
@@ -26,21 +28,22 @@ class StatusBar extends React.Component{
     }
 
     render() {
-
         return (
             <section className={'scope--status-bar'}>
                 {
-                    this.state.lis.map((v)=>{
+                    this.state.lis.map((v) => {
                         return (
-                            <span onAnimationEnd={(e)=>{
-                                this.animateEndLength ++;
-                                // 一次性清空
-                                if (this.state.lis.length === this.animateEndLength){
-                                    this.setState({
-                                        lis: []
-                                    })
-                                }
-                            }} key={v.id}>{v.text}</span>
+                            <span className={v.class_} key={v.id}
+                                  onAnimationEnd={() => {
+                                      this.animateEndLength++;
+                                      // 一次性清空
+                                      if (this.state.lis.length === this.animateEndLength) {
+                                          this.setState({
+                                              lis: []
+                                          })
+                                      }
+                                  }}
+                            >{v.text}</span>
                         )
                     })
                 }
