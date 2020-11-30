@@ -12,9 +12,10 @@ class Game extends React.Component{
     constructor(props) {
         super(props);
         this.activePos = [];
+        this.statusBar = <StatusBar set={(func)=>{this.setState({setStatus: func})}}/>
         this.state = {
             available: '',
-            err: '',
+            setStatus: null,
             lang: 'zh',
             assistant: true,
 
@@ -38,9 +39,7 @@ class Game extends React.Component{
     }
 
     throwError(err){
-        this.setState({
-            err: err
-        })
+        this.state.setStatus(err)
     }
 
     async reload (){
@@ -322,7 +321,7 @@ class Game extends React.Component{
         }
         return (
             <div className={'scope--game'}>
-                <StatusBar class_={''} text={this.state.err}/>
+                {this.statusBar}
                 {content}
             </div>)
     }
